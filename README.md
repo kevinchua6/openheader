@@ -12,47 +12,9 @@ A lightweight Chrome extension to modify HTTP request and response headers and f
 
 ## Installation
 
-> **Note:** Chrome blocks `.crx` files not from the Web Store (`CRX_REQUIRED_PROOF_MISSING`), so installation requires loading the extension unpacked.
+Install directly from the Chrome Web Store:
 
-### Option 1: Download from Releases (Recommended)
-
-1. Go to the [Releases page](../../releases) and download the latest `.zip`
-2. Unzip the file
-3. Open Chrome and navigate to `chrome://extensions`
-4. Enable **Developer mode** (toggle in the top-right corner)
-5. Click **Load unpacked** and select the unzipped folder
-6. The extension will appear in your toolbar immediately
-
-### Option 2: Clone from Source
-
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/yourusername/openheader.git
-   ```
-
-2. Build the per-browser folders (requires [Node.js](https://nodejs.org)):
-
-   ```bash
-   npm run build          # builds both dist/chrome and dist/firefox
-   # or target one browser:
-   npm run build:chrome
-   npm run build:firefox
-   ```
-
-3. **Chrome:** open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select `dist/chrome`.
-4. **Firefox:** open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…**, and select `dist/firefox/manifest.json`.
-
-## Building for release
-
-The extension supports both Chrome (MV3 service worker) and Firefox (MV3 background scripts) from a single source. `manifest.base.json` holds the shared config, and `build.js` injects the correct `background` block per browser:
-
-```bash
-npm run build          # -> dist/chrome, dist/firefox
-npm run zip            # -> dist/openheader-chrome.zip, dist/openheader-firefox.zip
-```
-
-Why: Chrome only supports `background.service_worker` and warns on `background.scripts`, while Firefox only supports `background.scripts`. Generating separate manifests avoids the warning without maintaining two branches.
+**[OpenHeader on the Chrome Web Store](https://chromewebstore.google.com/detail/openheader/dbemfnngokmgenphnpddlfmdefmjijje)**
 
 ## Usage
 
