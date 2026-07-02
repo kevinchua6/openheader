@@ -59,8 +59,10 @@
     --header-badge-fg: #ffffff;
     --header-input-bg: rgba(255, 255, 255, 0.55);
     --header-input-border: #5E81AC;
-    --header-pause-bg: rgba(255, 255, 255, 0.28);
-    --header-pause-ring: rgba(255, 255, 255, 0.35);
+    --header-pause-bg: #5E81AC;
+    --header-pause-ring: #4272A0;
+    --header-pause-fg: #ffffff;
+    --header-pause-hover: #4272A0;
     --header-shadow: 0 1px 0 #c5d4ea;
     --card-bg: #edf3ff;
     --border: #cddbf0;
@@ -103,8 +105,10 @@
   --header-badge-fg: #ffffff;
   --header-input-bg: rgba(255, 255, 255, 0.55);
   --header-input-border: #5E81AC;
-  --header-pause-bg: rgba(255, 255, 255, 0.28);
-  --header-pause-ring: rgba(255, 255, 255, 0.35);
+  --header-pause-bg: #5E81AC;
+  --header-pause-ring: #4272A0;
+  --header-pause-fg: #ffffff;
+  --header-pause-hover: #4272A0;
   --header-shadow: 0 1px 0 #c5d4ea;
   --card-bg: #edf3ff;
   --border: #cddbf0;
@@ -268,6 +272,11 @@ body.preload *::after {
 .header-action-btn.pause {
   background: var(--header-pause-bg);
   box-shadow: 0 0 0 1px var(--header-pause-ring) inset;
+  color: var(--header-pause-fg, var(--header-fg-muted));
+}
+.header-action-btn.pause:hover {
+  background: var(--header-pause-hover, var(--header-control-hover));
+  color: var(--header-pause-fg, var(--header-fg));
 }
 .header-action-btn.play { background: var(--accent-green); color: white; }
 .header-action-btn.play:hover { background: var(--accent-green-hover); }
