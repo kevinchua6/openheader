@@ -49,6 +49,78 @@ function uid(prefix) {
   return prefix + "_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
 }
 
+// ---------- Drag-and-drop row reordering ----------
+const DRAG_HANDLE_PATH =
+  "M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6C7.9 4 7 4.9 7 6s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z";
+
+function createDragHandle() {
+  const handle = document.createElement("div");
+  handle.className = "drag-handle";
+  handle.title = "Drag to reorder";
+  handle.draggable = true;
+  handle.appendChild(makeSvgIcon(DRAG_HANDLE_PATH));
+  return handle;
+}
+
+// Makes `row` reorderable within `container` via `handle`. `onDrop` is
+// called once the drag finishes so the caller can persist the new order.
+function makeRowDraggable(row, handle, container, rowSelector, onDrop) {
+  handle.addEventListener("dragstart", (e) => {
+    const rect = row.getBoundingClientRect();
+    try {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", row.dataset.id || "");
+      e.dataTransfer.setDragImage(
+        row,
+        e.clientX - rect.left,
+        e.clientY - rect.top,
+      );
+    } catch (_) {}
+    // Deferred so the drag image is captured before we dim the row.
+    setTimeout(() => row.classList.add("dragging"), 0);
+  });
+  handle.addEventListener("dragend", () => {
+    row.classList.remove("dragging");
+    onDrop();
+  });
+}
+
+function getDragAfterElement(container, y, rowSelector) {
+  const elements = Array.from(
+    container.querySelectorAll(`${rowSelector}:not(.dragging)`),
+  );
+  return elements.reduce(
+    (closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset, element: child };
+      }
+      return closest;
+    },
+    { offset: Number.NEGATIVE_INFINITY, element: null },
+  ).element;
+}
+
+// Sets up a single container-level dragover/drop listener that live-moves
+// the currently dragging row as the pointer travels over sibling rows.
+function setupDragReorder(containerId, rowSelector) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.addEventListener("dragover", (e) => {
+    const dragging = container.querySelector(`${rowSelector}.dragging`);
+    if (!dragging) return;
+    e.preventDefault();
+    const afterElement = getDragAfterElement(container, e.clientY, rowSelector);
+    if (afterElement == null) {
+      container.appendChild(dragging);
+    } else {
+      container.insertBefore(dragging, afterElement);
+    }
+  });
+  container.addEventListener("drop", (e) => e.preventDefault());
+}
+
 // Debounced save for text inputs
 let saveTimeout = null;
 function debouncedSave() {
@@ -270,6 +342,13 @@ function setupEventListeners() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeAllDropdowns();
   });
+
+  // Drag-and-drop row reordering
+  setupDragReorder("request-rows", ".header-row");
+  setupDragReorder("response-rows", ".header-row");
+  setupDragReorder("filter-rows", ".filter-row");
+  setupDragReorder("block-url-rows", ".filter-row");
+  setupDragReorder("tab-filter-rows", ".tab-filter-row");
 }
 
 // ---------- Dropdown helpers ----------
@@ -783,6 +862,9 @@ function renderHeaderRows(type) {
   headers.forEach((header) => {
     const row = document.createElement("div");
     row.className = "header-row";
+    row.dataset.id = header.id;
+
+    const handle = createDragHandle();
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -820,7 +902,11 @@ function renderHeaderRows(type) {
     deleteBtn.title = "Delete";
     deleteBtn.appendChild(makeSvgIcon("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"));
 
-    row.append(checkbox, select, nameInput, valueInput, deleteBtn);
+    row.append(handle, checkbox, select, nameInput, valueInput, deleteBtn);
+
+    makeRowDraggable(row, handle, container, ".header-row", () =>
+      commitHeaderOrder(type),
+    );
 
     checkbox.addEventListener("change", (e) => {
       header.enabled = e.target.checked;
@@ -858,6 +944,25 @@ function renderHeaderRows(type) {
   });
 }
 
+function commitHeaderOrder(type) {
+  const p = getActiveProfile();
+  if (!p) return;
+  const container = document.getElementById(`${type}-rows`);
+  const orderedIds = Array.from(container.querySelectorAll(".header-row")).map(
+    (r) => r.dataset.id,
+  );
+  const positions = [];
+  p.headers.forEach((h, idx) => {
+    if (h.type === type) positions.push(idx);
+  });
+  const byId = new Map(p.headers.map((h) => [h.id, h]));
+  const reordered = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+  positions.forEach((pos, i) => {
+    if (reordered[i]) p.headers[pos] = reordered[i];
+  });
+  saveState();
+}
+
 function renderFilterRows() {
   const container = document.getElementById("filter-rows");
   container.replaceChildren();
@@ -876,6 +981,9 @@ function renderFilterRows() {
   filters.forEach((filter) => {
     const row = document.createElement("div");
     row.className = "filter-row";
+    row.dataset.id = filter.id;
+
+    const handle = createDragHandle();
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -894,7 +1002,9 @@ function renderFilterRows() {
     deleteBtn.title = "Delete";
     deleteBtn.appendChild(makeSvgIcon("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"));
 
-    row.append(checkbox, valueInput, deleteBtn);
+    row.append(handle, checkbox, valueInput, deleteBtn);
+
+    makeRowDraggable(row, handle, container, ".filter-row", commitFilterOrder);
 
     checkbox.addEventListener("change", (e) => {
       filter.enabled = e.target.checked;
@@ -912,6 +1022,18 @@ function renderFilterRows() {
 
     container.appendChild(row);
   });
+}
+
+function commitFilterOrder() {
+  const p = getActiveProfile();
+  if (!p) return;
+  const container = document.getElementById("filter-rows");
+  const orderedIds = Array.from(container.querySelectorAll(".filter-row")).map(
+    (r) => r.dataset.id,
+  );
+  const byId = new Map((p.filters || []).map((f) => [f.id, f]));
+  p.filters = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+  saveState();
 }
 
 function renderBlockedUrlRows() {
@@ -932,6 +1054,9 @@ function renderBlockedUrlRows() {
   blockedUrls.forEach((blockedUrl) => {
     const row = document.createElement("div");
     row.className = "filter-row";
+    row.dataset.id = blockedUrl.id;
+
+    const handle = createDragHandle();
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -950,7 +1075,9 @@ function renderBlockedUrlRows() {
     deleteBtn.title = "Delete";
     deleteBtn.appendChild(makeSvgIcon("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"));
 
-    row.append(checkbox, valueInput, deleteBtn);
+    row.append(handle, checkbox, valueInput, deleteBtn);
+
+    makeRowDraggable(row, handle, container, ".filter-row", commitBlockedUrlOrder);
 
     checkbox.addEventListener("change", (e) => {
       blockedUrl.enabled = e.target.checked;
@@ -970,6 +1097,18 @@ function renderBlockedUrlRows() {
   });
 }
 
+function commitBlockedUrlOrder() {
+  const p = getActiveProfile();
+  if (!p) return;
+  const container = document.getElementById("block-url-rows");
+  const orderedIds = Array.from(container.querySelectorAll(".filter-row")).map(
+    (r) => r.dataset.id,
+  );
+  const byId = new Map((p.blockedUrls || []).map((b) => [b.id, b]));
+  p.blockedUrls = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+  saveState();
+}
+
 function renderTabFilterRows() {
   const container = document.getElementById("tab-filter-rows");
   container.replaceChildren();
@@ -980,6 +1119,9 @@ function renderTabFilterRows() {
   tabFilters.forEach((filter) => {
     const row = document.createElement("div");
     row.className = "tab-filter-row";
+    row.dataset.id = filter.id;
+
+    const handle = createDragHandle();
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -1011,7 +1153,9 @@ function renderTabFilterRows() {
     deleteBtn.title = "Delete";
     deleteBtn.appendChild(makeSvgIcon("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"));
 
-    row.append(checkbox, label, deleteBtn);
+    row.append(handle, checkbox, label, deleteBtn);
+
+    makeRowDraggable(row, handle, container, ".tab-filter-row", commitTabFilterOrder);
 
     checkbox.addEventListener("change", (e) => {
       filter.enabled = e.target.checked;
@@ -1025,6 +1169,18 @@ function renderTabFilterRows() {
 
     container.appendChild(row);
   });
+}
+
+function commitTabFilterOrder() {
+  const p = getActiveProfile();
+  if (!p) return;
+  const container = document.getElementById("tab-filter-rows");
+  const orderedIds = Array.from(
+    container.querySelectorAll(".tab-filter-row"),
+  ).map((r) => r.dataset.id);
+  const byId = new Map((p.tabFilters || []).map((t) => [t.id, t]));
+  p.tabFilters = orderedIds.map((id) => byId.get(id)).filter(Boolean);
+  saveState();
 }
 
 function renderAll() {

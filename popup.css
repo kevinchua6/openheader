@@ -468,21 +468,44 @@ body.extension-disabled .card:not(.disabled) {
 
 .header-row {
   display: grid;
-  grid-template-columns: auto 84px 1fr 1fr auto;
+  grid-template-columns: auto auto 84px 1fr 1fr auto;
   align-items: center;
   gap: 8px;
 }
 .filter-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 8px;
 }
 .tab-filter-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 8px;
+}
+
+/* Drag handle */
+.drag-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 28px;
+  color: var(--text-dim);
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: color var(--t), background var(--t);
+}
+.drag-handle svg { width: 16px; height: 16px; pointer-events: none; }
+.drag-handle:hover { color: var(--text-muted); background: var(--row-hover); }
+.drag-handle:active { cursor: grabbing; }
+
+.header-row.dragging,
+.filter-row.dragging,
+.tab-filter-row.dragging {
+  opacity: 0.35;
 }
 
 /* Read-only tab label (favicon + url) */
