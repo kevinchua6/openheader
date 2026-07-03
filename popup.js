@@ -310,6 +310,57 @@ function setupEventListeners() {
       }
     });
 
+  // Select-all checkboxes (enable/disable every row in a section at once)
+  document
+    .getElementById("request-select-all")
+    .addEventListener("change", (e) => {
+      const p = getActiveProfile();
+      if (!p) return;
+      p.headers
+        .filter((h) => h.type === "request")
+        .forEach((h) => (h.enabled = e.target.checked));
+      saveState();
+      renderHeaderRows("request");
+    });
+  document
+    .getElementById("response-select-all")
+    .addEventListener("change", (e) => {
+      const p = getActiveProfile();
+      if (!p) return;
+      p.headers
+        .filter((h) => h.type === "response")
+        .forEach((h) => (h.enabled = e.target.checked));
+      saveState();
+      renderHeaderRows("response");
+    });
+  document
+    .getElementById("filter-select-all")
+    .addEventListener("change", (e) => {
+      const p = getActiveProfile();
+      if (!p) return;
+      (p.filters || []).forEach((f) => (f.enabled = e.target.checked));
+      saveState();
+      renderFilterRows();
+    });
+  document
+    .getElementById("tab-filter-select-all")
+    .addEventListener("change", (e) => {
+      const p = getActiveProfile();
+      if (!p) return;
+      (p.tabFilters || []).forEach((f) => (f.enabled = e.target.checked));
+      saveState();
+      renderTabFilterRows();
+    });
+  document
+    .getElementById("block-url-select-all")
+    .addEventListener("change", (e) => {
+      const p = getActiveProfile();
+      if (!p) return;
+      (p.blockedUrls || []).forEach((b) => (b.enabled = e.target.checked));
+      saveState();
+      renderBlockedUrlRows();
+    });
+
   // Add row buttons
   document
     .getElementById("add-request-header-btn")
@@ -804,6 +855,21 @@ function toggleCard(cardId, enabled) {
   document.getElementById(cardId).classList.toggle("disabled", !enabled);
 }
 
+// Keeps a section's "select all" checkbox in sync with its rows: checked when
+// every row is enabled, unchecked when none are, indeterminate otherwise.
+function updateSelectAllCheckbox(id, items) {
+  const cb = document.getElementById(id);
+  if (!cb) return;
+  if (!items || items.length === 0) {
+    cb.checked = false;
+    cb.indeterminate = false;
+    return;
+  }
+  const enabledCount = items.filter((item) => item.enabled).length;
+  cb.checked = enabledCount === items.length;
+  cb.indeterminate = enabledCount > 0 && enabledCount < items.length;
+}
+
 function renderProfileHeader() {
   const p = getActiveProfile();
   if (!p) return;
@@ -851,6 +917,7 @@ function renderHeaderRows(type) {
   if (!p) return;
 
   const headers = p.headers.filter((h) => h.type === type);
+  updateSelectAllCheckbox(`${type}-select-all`, headers);
   if (headers.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-row";
@@ -910,6 +977,7 @@ function renderHeaderRows(type) {
 
     checkbox.addEventListener("change", (e) => {
       header.enabled = e.target.checked;
+      updateSelectAllCheckbox(`${type}-select-all`, headers);
       saveState();
     });
 
@@ -969,6 +1037,7 @@ function renderFilterRows() {
   const p = getActiveProfile();
   if (!p) return;
   const filters = p.filters || [];
+  updateSelectAllCheckbox("filter-select-all", filters);
 
   if (filters.length === 0) {
     const empty = document.createElement("div");
@@ -1008,6 +1077,7 @@ function renderFilterRows() {
 
     checkbox.addEventListener("change", (e) => {
       filter.enabled = e.target.checked;
+      updateSelectAllCheckbox("filter-select-all", filters);
       saveState();
     });
     valueInput.addEventListener("input", (e) => {
@@ -1042,6 +1112,7 @@ function renderBlockedUrlRows() {
   const p = getActiveProfile();
   if (!p) return;
   const blockedUrls = p.blockedUrls || [];
+  updateSelectAllCheckbox("block-url-select-all", blockedUrls);
 
   if (blockedUrls.length === 0) {
     const empty = document.createElement("div");
@@ -1081,6 +1152,7 @@ function renderBlockedUrlRows() {
 
     checkbox.addEventListener("change", (e) => {
       blockedUrl.enabled = e.target.checked;
+      updateSelectAllCheckbox("block-url-select-all", blockedUrls);
       saveState();
     });
     valueInput.addEventListener("input", (e) => {
@@ -1115,6 +1187,7 @@ function renderTabFilterRows() {
   const p = getActiveProfile();
   if (!p) return;
   const tabFilters = p.tabFilters || [];
+  updateSelectAllCheckbox("tab-filter-select-all", tabFilters);
 
   tabFilters.forEach((filter) => {
     const row = document.createElement("div");
@@ -1159,6 +1232,7 @@ function renderTabFilterRows() {
 
     checkbox.addEventListener("change", (e) => {
       filter.enabled = e.target.checked;
+      updateSelectAllCheckbox("tab-filter-select-all", tabFilters);
       saveState();
     });
     deleteBtn.addEventListener("click", () => {

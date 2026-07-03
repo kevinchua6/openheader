@@ -423,6 +423,12 @@ body.extension-disabled .card:not(.disabled) {
   justify-content: space-between;
   margin-bottom: 10px;
 }
+.card-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
 .card-title {
   font-size: 13px;
   font-weight: 700;
@@ -594,6 +600,47 @@ body.extension-disabled .card:not(.disabled) {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* Select-all checkbox (in card head) */
+.select-all-check {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--t), border-color var(--t);
+  flex-shrink: 0;
+}
+.select-all-check:hover { border-color: var(--text-muted); }
+.select-all-check:checked,
+.select-all-check:indeterminate {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+.select-all-check:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.select-all-check:indeterminate::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 6.5px;
+  width: 8px;
+  height: 2px;
+  background: white;
 }
 
 /* Delete button */

@@ -65,7 +65,10 @@
     <!-- Request headers -->
     <section class="card" id="request-card">
       <div class="card-head">
-        <h2 class="card-title">Request headers</h2>
+        <div class="card-head-left">
+          <input type="checkbox" class="select-all-check" id="request-select-all" title="Enable/disable all request headers">
+          <h2 class="card-title">Request headers</h2>
+        </div>
         <label class="switch" title="Enable request header modifications">
           <input type="checkbox" id="request-section-enabled">
           <span class="slider"></span>
@@ -81,7 +84,10 @@
     <!-- Response headers -->
     <section class="card" id="response-card">
       <div class="card-head">
-        <h2 class="card-title">Response headers</h2>
+        <div class="card-head-left">
+          <input type="checkbox" class="select-all-check" id="response-select-all" title="Enable/disable all response headers">
+          <h2 class="card-title">Response headers</h2>
+        </div>
         <label class="switch" title="Enable response header modifications">
           <input type="checkbox" id="response-section-enabled">
           <span class="slider"></span>
@@ -97,7 +103,10 @@
     <!-- URL filters (optional, tucked at the bottom) -->
     <section class="card" id="filters-card">
       <div class="card-head">
-        <h2 class="card-title">URL filters <span class="card-subtitle">optional</span></h2>
+        <div class="card-head-left">
+          <input type="checkbox" class="select-all-check" id="filter-select-all" title="Enable/disable all URL filters">
+          <h2 class="card-title">URL filters <span class="card-subtitle">optional</span></h2>
+        </div>
         <label class="switch" title="Enable URL filters">
           <input type="checkbox" id="filters-section-enabled">
           <span class="slider"></span>
@@ -113,7 +122,10 @@
     <!-- Block URLs (optional; takes priority over header modifications) -->
     <section class="card" id="block-urls-card">
       <div class="card-head">
-        <h2 class="card-title">Block URLs <span class="card-subtitle">optional</span></h2>
+        <div class="card-head-left">
+          <input type="checkbox" class="select-all-check" id="block-url-select-all" title="Enable/disable all blocked URLs">
+          <h2 class="card-title">Block URLs <span class="card-subtitle">optional</span></h2>
+        </div>
         <label class="switch" title="Enable URL blocking">
           <input type="checkbox" id="block-urls-section-enabled">
           <span class="slider"></span>
@@ -131,7 +143,10 @@
     <!-- Tab filters (optional) -->
     <section class="card" id="tab-filters-card">
       <div class="card-head">
-        <h2 class="card-title">Tab filters <span class="card-subtitle">optional</span></h2>
+        <div class="card-head-left">
+          <input type="checkbox" class="select-all-check" id="tab-filter-select-all" title="Enable/disable all tab filters">
+          <h2 class="card-title">Tab filters <span class="card-subtitle">optional</span></h2>
+        </div>
         <label class="switch" title="Enable tab filters">
           <input type="checkbox" id="tab-filters-section-enabled">
           <span class="slider"></span>
