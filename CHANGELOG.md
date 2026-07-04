@@ -2,6 +2,12 @@
 
 All notable changes to OpenHeader are documented in this file.
 
+## [1.2.0] - 2026-07-04
+
+### Added
+- Drag and drop support for reordering profiles/headers.
+- Select all checkboxes for bulk-toggling headers.
+
 ## [1.1.0] - 2026-07-02
 
 ### Added
