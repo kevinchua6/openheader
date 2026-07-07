@@ -617,6 +617,8 @@ body.extension-disabled .card:not(.disabled) {
   flex-shrink: 0;
 }
 .select-all-check:hover { border-color: var(--text-muted); }
+.select-all-check:disabled { cursor: not-allowed; }
+.select-all-check:disabled:hover { border-color: var(--input-border); }
 .select-all-check:checked,
 .select-all-check:indeterminate {
   background: var(--accent-blue);

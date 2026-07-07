@@ -852,7 +852,10 @@ function updatePausePlayUI() {
 }
 
 function toggleCard(cardId, enabled) {
-  document.getElementById(cardId).classList.toggle("disabled", !enabled);
+  const card = document.getElementById(cardId);
+  card.classList.toggle("disabled", !enabled);
+  const selectAllCheck = card.querySelector(".select-all-check");
+  if (selectAllCheck) selectAllCheck.disabled = !enabled;
 }
 
 // Keeps a section's "select all" checkbox in sync with its rows: checked when
