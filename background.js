@@ -71,9 +71,12 @@ async function _rebuildRules() {
           ]
         : [];
 
-      // Blocked URLs take priority over header modifications: give them a
-      // higher DNR priority so a matching block rule wins and the request
-      // (along with any header modification) never goes through.
+      // Blocked URLs don't block the request itself — they just opt it out of
+      // header modifications. We do this with an "allow" action at a higher
+      // DNR priority than the modifyHeaders rules below: per DNR semantics, a
+      // matching allow/allowAllRequests rule causes all modifyHeaders rules of
+      // equal or lower priority to be ignored for that request, while leaving
+      // the request itself completely unaffected (not blocked or redirected).
       const activeBlockedUrls = blockUrlsEnabled
         ? (activeProfile.blockedUrls || []).filter((b) => b.enabled && b.value)
         : [];
@@ -92,7 +95,7 @@ async function _rebuildRules() {
         const rule = {
           id: ruleId++,
           priority: 2,
-          action: { type: "block" },
+          action: { type: "allow" },
           condition,
         };
         if (activeTabIds.length > 0) {

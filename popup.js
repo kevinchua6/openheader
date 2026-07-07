@@ -708,7 +708,7 @@ function showHelp() {
       "• Response headers: add/remove headers on responses.\n" +
       "• Set vs Remove: 'Set' overrides a header value; 'Remove' strips it.\n" +
       "• URL filters: optional regexes (e.g. .*://example.com/.*) to limit where changes apply. With no filters, changes apply everywhere.\n" +
-      "• Block URLs: optional regexes for requests to block outright. Blocking always takes priority over header changes — a blocked request never gets its headers modified.\n" +
+      "• Block URLs: optional regexes for requests that should be left alone. Matching requests still go through normally — they just never get their headers modified.\n" +
       "• Profiles: switch from the badge in the top-left; manage them from the ⋮ menu.\n" +
       "• Pause: the ⏸ button temporarily disables all modifications.",
   );
@@ -1117,7 +1117,7 @@ function renderBlockedUrlRows() {
   if (blockedUrls.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-row";
-    empty.textContent = "No blocked URLs — nothing is being blocked.";
+    empty.textContent = "No blocked URLs — headers apply everywhere.";
     container.appendChild(empty);
     return;
   }
