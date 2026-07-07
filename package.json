@@ -1,6 +1,6 @@
 {
   "name": "openheader",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A lightweight open-source extension to modify request and response headers and filter by URL regexes.",
   "private": true,
   "scripts": {

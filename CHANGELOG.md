@@ -2,6 +2,12 @@
 
 All notable changes to OpenHeader are documented in this file.
 
+## [1.2.1] - 2026-07-07
+
+### Fixed
+- Block URLs no longer blocks the network request itself — matching requests now go through normally and simply skip header modifications, as intended.
+- Select-all checkboxes are now disabled (not just visually greyed out) when their section is turned off, so they can't be clicked while inactive.
+
 ## [1.2.0] - 2026-07-04
 
 ### Added
